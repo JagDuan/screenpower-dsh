@@ -69,6 +69,21 @@ jobs:
           TAG: ${{ github.event.inputs.tag || github.ref_name }}
         run: |
           $tag = $env:TAG
-          gh release create $tag --title "ScreenPower DSH $tag" --notes-file release-notes.md "release-assets/*.tgz" --verify-tag
-          if ($LASTEXITCODE -ne 0) { throw "gh release create failed with exit code $LASTEXITCODE" }
+          # `gh release create` fails when a release for this tag already
+          # exists, which happens when a tag is moved and re-pushed. Editing
+          # the existing release keeps the tag and the assets in sync.
+          $existing = gh release view $tag --json tagName --jq '.tagName' 2>$null
+          if ($LASTEXITCODE -eq 0 -and $existing) {
+            Write-Host "release for $tag already exists - updating it"
+            gh release edit $tag --title "ScreenPower DSH $tag" --notes-file release-notes.md
+            if ($LASTEXITCODE -ne 0) { throw "gh release edit failed with exit code $LASTEXITCODE" }
+            Get-ChildItem release-assets -Filter *.tgz | ForEach-Object {
+              gh release upload $tag $_.FullName --clobber
+              if ($LASTEXITCODE -ne 0) { throw "gh release upload failed with exit code $LASTEXITCODE" }
+            }
+          }
+          else {
+            gh release create $tag --title "ScreenPower DSH $tag" --notes-file release-notes.md "release-assets/*.tgz" --verify-tag
+            if ($LASTEXITCODE -ne 0) { throw "gh release create failed with exit code $LASTEXITCODE" }
+          }
           Write-Host "release published for $tag"
