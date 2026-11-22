@@ -44,23 +44,25 @@ jobs:
       - name: Validate every JSON file
         shell: pwsh
         run: |
+          # PowerShell 5.1's ConvertFrom-Json cannot parse the empty-string key ""
+          # that npm lockfiles use, so validate with Node instead.
           $files = Get-ChildItem -Path . -Recurse -Filter *.json |
             Where-Object { $_.FullName -notmatch 'node_modules' }
           foreach ($f in $files) {
-            $bytes = [System.IO.File]::ReadAllBytes($f.FullName)
-            $text = [System.Text.Encoding]::UTF8.GetString($bytes)
-            $null = $text | ConvertFrom-Json
+            node -e "JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'))" $f.FullName
+            if ($LASTEXITCODE -ne 0) { throw "invalid JSON: $($f.FullName)" }
             Write-Host "ok  $($f.FullName.Substring($PWD.Path.Length + 1))"
           }
 
       - name: Validate YAML files
         shell: pwsh
         run: |
+          # Fail fast on tab indentation, which YAML forbids.
           $files = Get-ChildItem -Path . -Recurse -Include *.yml,*.yaml |
             Where-Object { $_.FullName -notmatch 'node_modules' }
           foreach ($f in $files) {
-            $head = Get-Content $f.FullName -TotalCount 1
-            if ($head -eq '---') { continue }
+            $bad = Select-String -Path $f.FullName -Pattern "`t"
+            if ($bad) { throw "tab indentation in $($f.FullName) (line $($bad[0].LineNumber))" }
             Write-Host "ok  $($f.FullName.Substring($PWD.Path.Length + 1))"
           }
 
