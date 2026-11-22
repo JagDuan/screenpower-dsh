@@ -1,0 +1,8 @@
+node_modules/
+*.tgz
+*.log
+.DS_Store
+Thumbs.db
+.npm-cache/
+packages/ui/node_modules/
+packages/mcp/node_modules/

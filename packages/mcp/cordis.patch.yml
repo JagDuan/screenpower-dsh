@@ -1,0 +1,10 @@
+- insert:
+    - id: mcp-screenpower
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: screenpower
+        transport: stdio
+        command: 'C:\nvm4w\nodejs\node.exe'
+        args:
+          - 'C:\Users\Administrator\Documents\deepseek-harness\default-workspace\screenpower-dsh\packages\mcp\server.js'
+        failOnStartupError: false

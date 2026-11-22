@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "ScreenPower 黑屏工具（MCP）",
+    "description": "把 ScreenPower 黑屏助手以 MCP 工具形式接入：screenpower_status 查询状态、screenpower_blackout 黑屏、screenpower_wake 亮屏、screenpower_modes 列出方式。可让 Windows 屏幕单独熄灭而电脑继续运行，按任意键或点击鼠标唤醒，也可设定时亮屏。需先在主机安装 ScreenPower。",
+    "detail": "docs/DETAIL.zh.md"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "ScreenPower MCP",
+    "description": "Exposes the ScreenPower blackout helper as MCP tools: screenpower_status, screenpower_blackout, screenpower_wake, and screenpower_modes. Blank the Windows screen while the computer keeps running, wake it on any key or click, or schedule an automatic wake time. Requires ScreenPower to be installed on the host.",
+    "detail": "docs/DETAIL.md"
+  }
+}

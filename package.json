@@ -1,0 +1,55 @@
+{
+    "name":  "screenpower-dsh",
+    "version":  "1.0.0",
+    "description":  "One-click blackout for DeepSeek Harness: a UI panel in the sidebar plus MCP tools for scheduled/manual screen blackout and auto wake.",
+    "keywords":  [
+                     "deepseek-harness",
+                     "dsh",
+                     "blackout",
+                     "screen",
+                     "sleep-mode",
+                     "mcp",
+                     "mcp-server",
+                     "windows",
+                     "dsh-plugin"
+                 ],
+    "homepage":  "https://github.com/OWNER/screenpower-dsh#readme",
+    "bugs":  "https://github.com/OWNER/screenpower-dsh/issues",
+    "repository":  {
+                       "type":  "git",
+                       "url":  "git+https://github.com/OWNER/screenpower-dsh.git"
+                   },
+    "license":  "MIT",
+    "author":  "ScreenPower DSH contributors",
+    "type":  "module",
+    "bin":  {
+                "screenpower-mcp":  "packages/mcp/server.js",
+                   "screenpower-dsh-install":  "scripts/screenpower-dsh-install.mjs"
+            },
+    "engines":  {
+                    "node":  ">=18"
+                },
+    "files":  [
+                  "packages/mcp/server.js",
+                  "packages/mcp/cordis.patch.yml",
+                  "packages/mcp/package.json",
+                  "packages/mcp/locale",
+                  "packages/mcp/docs",
+                  "packages/mcp/icon.svg",
+                  "packages/ui",
+                  "shared/screenpower-core.js",
+                  "vendor/screenpower",
+                  "scripts/install.mjs",
+                  "scripts/smoke-mcp.mjs",
+                   "scripts/screenpower-dsh-install.mjs",
+                  "README.md",
+                  "LICENSE"
+              ],
+    "scripts":  {
+                    "smoke":  "node scripts/smoke-mcp.mjs .",
+                    "install:harness":  "node scripts/install.mjs"
+                },
+    "dependencies":  {
+                         "@modelcontextprotocol/server":  "^2.4.0"
+                     }
+}

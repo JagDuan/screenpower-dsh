@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Quick Blackout",
+    "description": "Adds a Quick Blackout panel with a sidebar entry. Blank the Windows screen while the computer keeps running, with three modes — scheduled blackout (auto wake at a chosen time), manual blackout (wake on any key or click), and sleep guard (keep awake without blanking). Open the Quick Blackout panel from the left sidebar to pick a mode and set the wake time.",
+    "detail": "docs/DETAIL.md"
+  }
+}

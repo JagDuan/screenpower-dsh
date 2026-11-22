@@ -1,0 +1,3 @@
+- insert:
+    - id: screenpower-ui
+      name: '@local/screenpower-ui'
