@@ -13,11 +13,11 @@
                      "windows",
                      "dsh-plugin"
                  ],
-    "homepage":  "https://github.com/OWNER/screenpower-dsh#readme",
-    "bugs":  "https://github.com/OWNER/screenpower-dsh/issues",
+    "homepage":  "https://github.com/JagDuan/screenpower-dsh#readme",
+    "bugs":  "https://github.com/JagDuan/screenpower-dsh/issues",
     "repository":  {
                        "type":  "git",
-                       "url":  "git+https://github.com/OWNER/screenpower-dsh.git"
+                       "url":  "git+https://github.com/JagDuan/screenpower-dsh.git"
                    },
     "license":  "MIT",
     "author":  "ScreenPower DSH contributors",

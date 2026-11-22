@@ -47,7 +47,7 @@ screenpower-dsh-install
 **方式 B —— 从 GitHub 源码**
 
 ```powershell
-git clone https://github.com/OWNER/screenpower-dsh.git
+git clone https://github.com/JagDuan/screenpower-dsh.git
 cd screenpower-dsh
 node scripts/install.mjs
 ```
