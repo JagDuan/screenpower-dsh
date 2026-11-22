@@ -94,6 +94,14 @@ jobs:
         run: npm ci
 
       - name: Publish
-        run: npm publish --provenance --access public
+        shell: pwsh
+        run: |
+          if (-not $env:NODE_AUTH_TOKEN) {
+            Write-Host 'NPM_TOKEN secret is not configured - skipping the npm publish.'
+            Write-Host 'Add it under Settings -> Secrets and variables -> Actions to enable npm publishing.'
+            exit 0
+          }
+          npm publish --provenance --access public
+          if ($LASTEXITCODE -ne 0) { throw "npm publish failed with exit code $LASTEXITCODE" }
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

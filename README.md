@@ -41,7 +41,8 @@
 
 **方式 A —— 从 GitHub Releases（推荐，最省事）**
 
-打开 <https://github.com/JagDuan/screenpower-dsh/releases>，下载最新的 `screenpower-dsh-*.tgz`，
+打开 <https://github.com/JagDuan/screenpower-dsh/releases>，下载最新的 `screenpower-dsh-*.tgz`
+（当前版本：[`screenpower-dsh-1.0.0.tgz`](https://github.com/JagDuan/screenpower-dsh/releases/download/v1.0.0/screenpower-dsh-1.0.0.tgz)），
 解压后执行 `node scripts/install.mjs`（仍需 Node 来跑 MCP server）。
 
 **方式 B —— 从 GitHub 源码**
