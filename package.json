@@ -31,6 +31,7 @@
                 },
     "files":  [
                   "packages/mcp/server.js",
+                  "packages/mcp/launch.mjs",
                   "packages/mcp/cordis.patch.yml",
                   "packages/mcp/package.json",
                   "packages/mcp/locale",
