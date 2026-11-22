@@ -52,6 +52,11 @@ cd screenpower-dsh
 node scripts/install.mjs
 ```
 
+**方式 C —— 离线包（不想装 Node / 不想 clone）**
+
+下载 [`screenpower-dsh-1.0.0.tgz`](https://raw.githubusercontent.com/JagDuan/screenpower-dsh/release-assets/screenpower-dsh-1.0.0.tgz)，
+解压后同样执行 `node scripts/install.mjs`（仍需 Node 运行 MCP server）。
+
 两条路径执行的都是同一套逻辑，它会：
 
 1. 把 `ScreenPower.exe` 等文件安装到 `%ProgramData%\ScreenPower`（可用 `--install-dir` 指定其他目录）；
