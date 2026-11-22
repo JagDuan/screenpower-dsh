@@ -1,8 +1,9 @@
 # ScreenPower for DeepSeek Harness
 
-[![npm](https://img.shields.io/npm/v/screenpower-dsh.svg)](https://www.npmjs.com/package/screenpower-dsh)
+[![CI](https://github.com/JagDuan/screenpower-dsh/actions/workflows/ci.yml/badge.svg)](https://github.com/JagDuan/screenpower-dsh/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-informational.svg)](https://learn.microsoft.com/windows)
+[![npm](https://img.shields.io/npm/v/screenpower-dsh.svg)](https://www.npmjs.com/package/screenpower-dsh)
 
 > 一键黑屏 / 睡觉模式 / 定时亮屏，深度集成进 DeepSeek Harness：左侧栏「快捷黑屏」面板 + MCP 连接器下的 4 个黑屏工具。
 
@@ -31,18 +32,17 @@
 > **给其他使用者的最短路径**（不想读下面也行，就这三行）：
 >
 > ```powershell
-> npm install -g screenpower-dsh          # 装 MCP server + 安装脚本
-> screenpower-dsh-install                # 装原生工具（会弹 UAC）
+> git clone https://github.com/JagDuan/screenpower-dsh.git
+> cd screenpower-dsh
+> node scripts/install.mjs          # 会弹 UAC，装原生工具并打印 DSH 配置
 > ```
 >
-> 然后在 DSH 里：① 插件管理装 UI bundle（见第 2 步）② 「MCP 连接器」新增 stdio 连接，命令 `screenpower-mcp`，参数留空。
+> 然后在 DSH 里：① 插件管理装 UI bundle（见第 2 步）② 「MCP 连接器」新增 stdio 连接。
 
-**方式 A —— 从 npm（推荐）**
+**方式 A —— 从 GitHub Releases（推荐，最省事）**
 
-```powershell
-npm install -g screenpower-dsh
-screenpower-dsh-install
-```
+打开 <https://github.com/JagDuan/screenpower-dsh/releases>，下载最新的 `screenpower-dsh-*.tgz`，
+解压后执行 `node scripts/install.mjs`（仍需 Node 来跑 MCP server）。
 
 **方式 B —— 从 GitHub 源码**
 
@@ -52,10 +52,15 @@ cd screenpower-dsh
 node scripts/install.mjs
 ```
 
-**方式 C —— 离线包（不想装 Node / 不想 clone）**
+**方式 C —— 从 npm**（包已发布后可用）
 
-下载 [`screenpower-dsh-1.0.0.tgz`](https://raw.githubusercontent.com/JagDuan/screenpower-dsh/release-assets/screenpower-dsh-1.0.0.tgz)，
-解压后同样执行 `node scripts/install.mjs`（仍需 Node 运行 MCP server）。
+```powershell
+npm install -g screenpower-dsh
+screenpower-dsh-install
+```
+
+> npm 版的发布由 GitHub Actions 在打 tag 时自动完成（见 [`.github/workflows/ci.yml`](.github/workflows/ci.yml)）。
+> 若提示 `404 Not Found`，说明该版本尚未发布，用上面 A / B 两种方式即可。
 
 两条路径执行的都是同一套逻辑，它会：
 
@@ -207,6 +212,17 @@ npm run install:harness   # 本机安装（原生工具 + 打印 DSH 配置）
 ```
 
 源码结构见上面「四、目录结构」。原生工具源码在 `vendor/screenpower/ScreenPower.cs`（C#，`build.ps1` 用 .NET Framework 的 `csc` 编译）。
+
+### 自动化发布
+
+| 工作流 | 触发条件 | 作用 |
+|---|---|---|
+| [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | push / PR | 跑语法检查、JSON 校验、MCP 冒烟；打 `v*` tag 时顺带 `npm publish` |
+| [`.github/workflows/release.yml`](.github/workflows/release.yml) | 打 `v*` tag | 构建 tgz 并创建 GitHub Release，tgz 作为 Release 附件 |
+
+npm 发布需要仓库里配置一个 secret：`Settings → Secrets and variables → Actions → New repository secret`，
+名字叫 `NPM_TOKEN`，值填 npm automation token（<https://www.npmjs.com/settings/access-tokens>）。
+没有这个 secret 时，CI 仍会全部通过，只是跳过 npm 发布这一步。
 
 ## 八、许可证
 

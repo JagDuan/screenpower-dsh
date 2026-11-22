@@ -20,7 +20,7 @@
                        "url":  "git+https://github.com/JagDuan/screenpower-dsh.git"
                    },
     "license":  "MIT",
-    "author":  "ScreenPower DSH contributors",
+    "author":  "JagDuan",
     "type":  "module",
     "bin":  {
                 "screenpower-mcp":  "packages/mcp/server.js",
