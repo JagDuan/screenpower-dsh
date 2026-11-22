@@ -35,6 +35,33 @@ jobs:
           npm pack --pack-destination release-assets
           Get-ChildItem release-assets | ForEach-Object { Write-Host "asset: $($_.Name) $($_.Length) bytes" }
 
+      - name: Write the release notes
+        shell: pwsh
+        env:
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          $tag = $env:TAG
+          $lines = @(
+            "## ScreenPower DSH $tag"
+            ''
+            'One-click blackout for DeepSeek Harness.'
+            ''
+            '### Install'
+            ''
+            '```powershell'
+            'git clone https://github.com/JagDuan/screenpower-dsh.git'
+            'cd screenpower-dsh'
+            'node scripts/install.mjs'
+            '```'
+            ''
+            'Or download the tarball from the assets below, extract it and run `node scripts/install.mjs`.'
+            ''
+            '### Assets'
+            ''
+            '- `screenpower-dsh-*.tgz` - the npm tarball (contains the UI bundle, the MCP server and the native Windows tool)'
+          )
+          Set-Content -Path release-notes.md -Value $lines -Encoding utf8
+
       - name: Publish the GitHub Release
         shell: pwsh
         env:
@@ -42,33 +69,6 @@ jobs:
           TAG: ${{ github.event.inputs.tag || github.ref_name }}
         run: |
           $tag = $env:TAG
-          $notes = @"
-          ## ScreenPower DSH $tag
-
-          One-click blackout for DeepSeek Harness.
-
-          ### Install
-
-          ```powershell
-          npm install -g screenpower-dsh
-          screenpower-dsh-install
-          ```
-
-          Offline package: download `screenpower-dsh-*.tgz` from the assets below, extract it and run
-          `node scripts/install.mjs`.
-
-          ### Assets
-
-          - `screenpower-dsh-*.tgz` - the npm tarball (contains the UI bundle, the MCP server and the native Windows tool)
-          "@
-          $notes | Out-File -FilePath release-notes.md -Encoding utf8
-          gh release create $tag `
-            --title "ScreenPower DSH $tag" `
-            --notes-file release-notes.md `
-            release-assets/*.tgz `
-            --verify-tag
-
-      - name: Upload the release notes
-        if: always()
-        shell: pwsh
-        run: echo "release notes: release-notes.md"
+          gh release create $tag --title "ScreenPower DSH $tag" --notes-file release-notes.md "release-assets/*.tgz" --verify-tag
+          if ($LASTEXITCODE -ne 0) { throw "gh release create failed with exit code $LASTEXITCODE" }
+          Write-Host "release published for $tag"
