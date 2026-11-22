@@ -30,7 +30,7 @@ import {
   runCli,
 } from '../../shared/screenpower-core.js'
 
-export const inject = ['tools', 'webServer']
+export const inject = ['tools', 'webServer', 'connection']
 
 /**
  * Stable result codes returned by `perform()`. The Client half maps these to
@@ -392,6 +392,12 @@ async function handleBridgeRequest(request, response, headers = {}) {
  * Access prompt, no fixed-port guessing, and no breakage when the Harness
  * host restarts on a different port.
  *
+ * The route is gated by the Host's own connection checks
+ * (`connection.requestRejection`), so it accepts exactly the same requests
+ * the Harness itself would accept for a first-party page. If the connection
+ * service is unavailable, or it throws, the request is rejected outright -
+ * we never fall back to a weaker Host/Origin/loopback test.
+ *
  * @param {import('@deepseek-ai/cordis').Context} ctx
  * @returns {() => void} Cleanup.
  */
@@ -400,8 +406,21 @@ function registerWebServerRoute(ctx) {
     const dispose = ctx.webServer.register({
       kind: 'exact',
       path: WEB_ROUTE_PATH,
-      handler: (request, response) => {
+      handler: async (request, response) => {
         const headers = { 'content-type': 'application/json' }
+        const rejection = await rejectUnauthenticatedRequest(ctx, request)
+        if (rejection !== undefined) {
+          response.writeHead(rejection, headers)
+          response.end(
+            JSON.stringify({
+              ok: false,
+              code: 'FORBIDDEN',
+              detail: `connection rejected the request (${rejection})`,
+              state: null,
+            }),
+          )
+          return
+        }
         return handleBridgeRequest(request, response, headers)
       },
     })
@@ -409,6 +428,30 @@ function registerWebServerRoute(ctx) {
       dispose()
     }
   }, 'screenpower: web panel bridge route')
+}
+
+/**
+ * Ask the Host connection service whether this request may proceed.
+ *
+ * `connection.requestRejection()` returns `undefined` when the route may
+ * accept the request, or a rejection status (401/403) otherwise. When the
+ * connection service is missing or throws, we reject with 403 rather than
+ * falling back to a weaker check.
+ *
+ * @param {import('@deepseek-ai/cordis').Context} ctx
+ * @param {{ headers: Record<string, string | string[] | undefined> }} request
+ * @returns {Promise<401 | 403 | undefined>}
+ */
+async function rejectUnauthenticatedRequest(ctx, request) {
+  const connection = ctx.get('connection')
+  if (!connection || typeof connection.requestRejection !== 'function') return 403
+  try {
+    const rejection = await connection.requestRejection({ headers: request.headers ?? {} })
+    return rejection ?? undefined
+  } catch (error) {
+    console.error('[screenpower] connection.requestRejection failed:', error)
+    return 403
+  }
 }
 
 /**
@@ -420,12 +463,14 @@ function registerWebServerRoute(ctx) {
 function registerHttpBridge(ctx) {
   const server = createServer((request, response) => {
     const origin = typeof request.headers.origin === 'string' ? request.headers.origin : ''
-    // Empty origin (same-origin / non-browser) and Electron's "null" origin are
-    // both local here; the server only ever binds to 127.0.0.1.
-    const allowed = origin === '' || origin === 'null' || isAllowedOrigin(origin)
+    // Only an explicit loopback origin may call the bridge. A missing Origin
+    // header is allowed because non-browser clients (and the packaged build's
+    // own probe) send none; a browser-sent "null" origin is NOT allowed,
+    // because it is what a sandboxed or opaque document looks like.
+    const allowed = origin === '' || isAllowedOrigin(origin)
 
-    // Common headers: reflect the requesting loopback origin so the browser
-    // accepts the cross-port response, and keep the bridge loopback-only.
+    // Reflect the requesting loopback origin so the browser accepts the
+    // cross-port response. Never emit a wildcard.
     const corsHeaders = {
       'access-control-allow-origin': allowed && origin ? origin : 'http://127.0.0.1',
       'access-control-allow-methods': 'POST, OPTIONS',

@@ -1,10 +1,31 @@
+# ScreenPower MCP bundle patch.
+#
+# The MCP server is spawned as a child process, so `dsh-mcp-client` needs a
+# concrete path to the server entry. `config.args` is handed to the child
+# process verbatim, so a relative path would be resolved against whatever
+# working directory the Host happens to use. The `!!js` expression below asks
+# the plugin package service for this bundle's own directory and appends the
+# launcher, which resolves `server.js` next to itself at runtime.
+#
+# `!!js` values are evaluated by the Loader against its own context, where
+# `ctx.get('pluginPackages')` exposes `packageOf(specifier, parentURL)`.
+# `parentURL` is the profile configuration directory, which is where the
+# profile's `node_modules` lives and therefore where this package resolves.
 - insert:
     - id: mcp-screenpower
       name: '@deepseek-ai/dsh-mcp-client'
       config:
         serverName: screenpower
         transport: stdio
-        command: 'C:\nvm4w\nodejs\node.exe'
+        command: 'node'
         args:
-          - 'C:\Users\Administrator\Documents\deepseek-harness\default-workspace\screenpower-dsh\packages\mcp\server.js'
+          - !!js >-
+            (() => {
+              const packages = ctx.get('pluginPackages');
+              if (packages === undefined) return undefined;
+              const parentURL = ctx.baseUrl ?? '';
+              const own = packages.packageOf('screenpower-dsh-mcp', parentURL);
+              if (own === undefined) return undefined;
+              return own.dir.replace(/\\/g, '/') + '/launch.mjs';
+            })()
         failOnStartupError: false

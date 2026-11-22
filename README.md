@@ -4,6 +4,7 @@
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-informational.svg)](https://learn.microsoft.com/windows)
 [![npm](https://img.shields.io/npm/v/screenpower-dsh.svg)](https://www.npmjs.com/package/screenpower-dsh)
+[![开放插件市场](https://img.shields.io/endpoint?url=https%3A%2F%2Fdshopen.org%2Fbadge%2Fscreenpower-dsh-ui.json)](https://dshopen.org/zh/plugins/screenpower-dsh-ui/)
 
 > 一键黑屏 / 睡觉模式 / 定时亮屏，深度集成进 DeepSeek Harness：左侧栏「快捷黑屏」面板 + MCP 连接器下的 4 个黑屏工具。
 
@@ -93,9 +94,17 @@ node scripts/install.mjs --skip-native
 - **仅防休眠**：屏幕保持正常，只阻止电脑睡眠（配合你自己的熄屏方式）；
 - 实时状态、连接指示、操作二次确认、中文 / 英文界面。
 
+> **已经装好 `packages/mcp` 这个 bundle 的话，第 3 步可以跳过。**
+> MCP bundle 的 Cordis 补丁里用 `!!js` 表达式在运行时算出自己所在目录并拼出 `launch.mjs`，
+> 所以路径不写死在配置里，换机器、换安装位置都能用 —— 它会自动注册出
+> `mcp__screenpower__*` 这 4 个工具。
+
 ### 第 3 步：添加 MCP 连接器
 
-在 DSH 的「MCP 连接器」中新增一个 **stdio** 连接：
+**推荐方式**：把 `packages/mcp` 目录作为本地 bundle 安装（DSH 插件管理 → 安装本地 bundle）。
+它会自动以 stdio 方式拉起 MCP server 并注册 4 个工具，**不需要你手填任何路径**。
+
+如果你更想手动加一个连接，在 DSH 的「MCP 连接器」中新增一个 **stdio** 连接：
 
 - 命令：`screenpower-mcp`（已通过 `npm i -g` 安装时可直接用这个短命令）
 - 参数：留空
@@ -131,14 +140,15 @@ ScreenPower 用**低级键盘 / 鼠标钩子**在断电前就捕获输入，再�
 ```
 screenpower-dsh/
 ├── packages/
-│   ├── ui/                 # DSH UI 插件（Host + Client）
-│   │   ├── index.js        # Host 半边：agent 工具 + 本地 HTTP bridge + perform()
+│   ├── ui/                 # DSH UI 插件（Host + Client）· npm 包名 screenpower-dsh-ui
+│   │   ├── index.js        # Host 半边：agent 工具 + 同源 webServer 路由 + perform()
 │   │   ├── client.js       # Client 半边：面板 UI
 │   │   ├── cordis.patch.yml
 │   │   ├── locale/         # 中文 / 英文文案
 │   │   └── docs/           # 详情页 + 预览图
-│   └── mcp/                # MCP server（stdio）
+│   └── mcp/                # MCP server（stdio）· npm 包名 screenpower-dsh-mcp
 │       ├── server.js       # 4 个 mcp__screenpower__* 工具
+│       ├── launch.mjs      # 自解析路径的启动器（供 Cordis 补丁调用）
 │       ├── cordis.patch.yml
 │       └── ...
 ├── shared/
@@ -224,6 +234,22 @@ npm run install:harness   # 本机安装（原生工具 + 打印 DSH 配置）
 npm 发布需要仓库里配置一个 secret：`Settings → Secrets and variables → Actions → New repository secret`，
 名字叫 `NPM_TOKEN`，值填 npm automation token（<https://www.npmjs.com/settings/access-tokens>）。
 没有这个 secret 时，CI 仍会全部通过，只是跳过 npm 发布这一步。
+
+### 收录进开放插件市场
+
+本插件已按 [开放插件市场](https://dshopen.org/) 的收录要求准备：
+
+| 要求 | 满足方式 |
+|---|---|
+| 公开 npm 版本 **或** 固定 Git 提交 | 两者都可用 —— npm 上架后走包名，仓库走 tag 对应的完整 40 位 SHA |
+| `package.json` 声明 `dsh.bundle.patch` | `packages/ui` 与 `packages/mcp` 都有 `dsh.bundle.patch`，补丁文件也在发布包内 |
+| 公开仓库 + 明确许可证 | Public 仓库 + MIT `LICENSE` |
+| 本机接口接入宿主认证 | 同源路由 `<DSH 地址>/plugins/screenpower` 先过 `connection.requestRejection()`，拿不到 connection 或校验异常一律 403，不退回只查 Host / Origin 的弱检查 |
+| 跨域不放宽 | 备用桥只反射回环地址 Origin，不返回 `Access-Control-Allow-Origin: *` |
+| 不硬编码机器路径 | MCP 补丁用 `!!js` 在运行时解析自身目录；配置文件里无绝对路径 |
+
+申请收录请在 <https://github.com/polang233/dsh-plugin-index/issues/new?template=plugin-add.yml> 提交，
+`plugin` 字段填仓库地址 + 子目录（例如 `https://github.com/JagDuan/screenpower-dsh` 与 `packages/ui`）。
 
 ## 八、许可证
 

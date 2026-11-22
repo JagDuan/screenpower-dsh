@@ -141,7 +141,7 @@ function normalizeUntil(value) {
 }
 
 window.__ModuleLoader__.load({
-  id: '@local/screenpower-ui',
+  id: 'screenpower-dsh-ui',
   factory(require) {
     const React = require('react')
     const h = React.createElement
@@ -755,7 +755,7 @@ window.__ModuleLoader__.load({
         // removes them on dispose/rebuild (see dsh-client-modules system.ts).
         if (typeof document !== 'undefined') {
           const styleEl = document.createElement('style')
-          styleEl.setAttribute('data-plugin', '@local/screenpower-ui')
+          styleEl.setAttribute('data-plugin', 'screenpower-dsh-ui')
           styleEl.textContent = PANEL_CSS
           document.head.append(styleEl)
         }

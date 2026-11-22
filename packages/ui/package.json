@@ -1,8 +1,7 @@
 {
-  "name": "@local/screenpower-ui",
+  "name": "screenpower-dsh-ui",
   "version": "1.0.0",
-  "private": true,
-  "description": "Quick blackout panel for DeepSeek Harness.",
+  "description": "Quick blackout panel for DeepSeek Harness: scheduled, manual and anti-sleep screen control.",
   "license": "MIT",
   "type": "module",
   "exports": {
